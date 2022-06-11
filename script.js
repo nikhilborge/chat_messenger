@@ -9,6 +9,11 @@ async function signup(e){
     try{
 
         const result = await firebase.auth().createUserWithEmailAndPassword(mailId.value, mailId.value);
+        await result.user.updateProfile({
+            displayName: "User"
+          })
+
+      await result.user.sendEmailVerification()
         console.log(result.user.email);
 
     }catch(error){
@@ -31,7 +36,7 @@ async function login(e){
 
     try{
 
-        const result = await firebase.auth().signInWithEmailAndPassword(mailId.value, mailId.value);
+        const result = await firebase.auth().signInWithEmailAndPassword(lmailId.value, lpassword.value);
         console.log(result.user.email);
 
     }catch(error){
@@ -43,6 +48,32 @@ async function login(e){
 }
 
 
+function logout(){
+    firebase.auth().signOut();
+}
+
+const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
+    if (user) {
+      console.log(user);
+    } else {
+      console.log('signout');
+    }
+  });
+
+
+
+  async function loginWithGoogle(){
+    var provider = new firebase.auth.GoogleAuthProvider();
+    try{
+
+     const result = await firebase.auth()
+      .signInWithPopup(provider)
+      console.log(result);
+    }catch(err){
+    console.log(err);
+    }
+  
+  }
 
 // const auth = getAuth();
 // createUserWithEmailAndPassword(auth, email, password)
