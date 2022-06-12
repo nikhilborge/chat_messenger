@@ -13,6 +13,8 @@ async function signup(e){
             displayName: "User"
           })
 
+          createUserCollection(result.user);
+
       await result.user.sendEmailVerification()
         console.log(result.user.email);
 
@@ -30,21 +32,21 @@ async function signup(e){
 
 async function login(e){
     e.preventDefault();
-    const lmailId = document.getElementById('lmailid');
-    const lpassword = document.getElementById('lPassword');
-    console.log(lmailId.value ,lpassword.value);
+    const mailId = document.getElementById('lmailid');
+    const password = document.getElementById('lPassword');
+    console.log(mailId.value, password.value);
 
     try{
 
-        const result = await firebase.auth().signInWithEmailAndPassword(lmailId.value, lpassword.value);
+        const result = await firebase.auth().signInWithEmailAndPassword(mailId.value, password.value);
         console.log(result.user.email);
 
     }catch(error){
         console.log(error);
         
     }
-    lmailId.value = "";
-    lpassword.value = "";
+    mailId.value = "";
+    password.value = "";
 }
 
 
@@ -69,6 +71,7 @@ const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
      const result = await firebase.auth()
       .signInWithPopup(provider)
       console.log(result);
+      createUserCollection(result.user);
     }catch(err){
     console.log(err);
     }
@@ -87,3 +90,64 @@ const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
 //     const errorMessage = error.message;
 //     // ..
 //   });
+
+
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+const username = prompt("please enter your name");
+
+document.getElementById("message-form").addEventListener("submit", sendMessage);
+
+function sendMessage(e) {
+  e.preventDefault();
+
+  // get values to be submitted
+  const timestamp = Date.now();
+  const messageInput = document.getElementById("message-input");
+  const message = messageInput.value;
+
+  // clear the input box
+  messageInput.value = "";
+
+  //auto scroll to bottom
+  document
+    .getElementById("messages")
+    .scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" });
+
+  // create db collection and send in the data
+  db.ref("messages/" + timestamp).set({
+    username,
+    message,
+  });
+}
+
+
+const fetchChat = db.ref("messages/");
+
+
+
+fetchChat.on("child_added", function (snapshot) {
+  const messages = snapshot.val();
+  const message = `<li class=${
+    username === messages.username ? "sent" : "receive"
+  }><span>${messages.username}: </span>${messages.message}</li>`;
+  // append the message on the page
+  document.getElementById("messages").innerHTML += message;
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
